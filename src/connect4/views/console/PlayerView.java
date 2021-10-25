@@ -2,12 +2,18 @@ package connect4.views.console;
 
 import static connect4.views.Message.*;
 
-import connect4.types.Color;
+import connect4.models.Player;
 
 public class PlayerView implements connect4.views.PlayerView {
 
-    public void writeWinner(Color color) {
-        new MessageView().writeln(PLAYER_WIN, color.name());
+    private Player player;
+    
+    PlayerView(Player player) {
+        this.player = player;
+    }
+    
+    public void writeWinner() {
+        new MessageView().writeln(PLAYER_WIN, player.getColor().name());
     }
 
 }

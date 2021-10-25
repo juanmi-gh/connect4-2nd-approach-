@@ -1,12 +1,14 @@
 package connect4.views.console;
 
+import connect4.models.Board;
+import connect4.models.Player;
 import connect4.views.ViewFactory;
 
 public class ConsoleViewFactory extends ViewFactory {
 
     @Override
-    public BoardView createBoardView() {
-        return new BoardView();
+    public BoardView createBoardView(Board board) {
+        return new BoardView(board);
     }
 
     @Override
@@ -15,8 +17,8 @@ public class ConsoleViewFactory extends ViewFactory {
     }
 
     @Override
-    public PlayerView createPlayerView() {
-        return new PlayerView();
+    public PlayerView createPlayerView(Player player) {
+        return new PlayerView(player);
     }
 
     @Override

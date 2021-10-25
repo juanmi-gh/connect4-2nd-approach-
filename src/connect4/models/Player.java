@@ -7,7 +7,7 @@ import connect4.types.Color;
 import connect4.types.Coordinate;
 import connect4.types.Error;
 
-class Player {
+public class Player {
 
     private Color color;
     private Board board;
@@ -50,7 +50,7 @@ class Player {
         return origin.equals(target) ? SAME_COORDINATES : getPutTokenError(target);
     }
 
-    Color getColor() {
+    public Color getColor() {
         return color;
     }
 

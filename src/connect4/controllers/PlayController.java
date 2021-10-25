@@ -16,11 +16,11 @@ public class PlayController extends Controller {
         do {
             getActionController().run();
             game.next();
-            writeBoard();
+            viewFactory.createBoardView(game.getBoard()).write();
         
         } while (!game.isTicTacToe());
 
-        viewFactory.createPlayerView().writeWinner(game.getActiveColor());
+        viewFactory.createPlayerView(game.getActivePlayer()).writeWinner();
     }
         
     protected Coordinate getCoordinate(Message message) {

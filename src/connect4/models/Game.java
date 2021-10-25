@@ -23,8 +23,12 @@ public class Game {
         turn.next();
     }
 
-    public Color getActiveColor() {
-        return turn.getActiveColor();
+    public Player getActivePlayer() {
+        return this.turn.getActivePlayer();
+    }
+    
+    public Board getBoard() {
+        return this.board;
     }
 
     public boolean isTicTacToe() {

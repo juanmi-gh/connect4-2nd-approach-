@@ -10,7 +10,7 @@ import connect4.types.Color;
 import connect4.types.Coordinate;
 import utils.models.Direction;
 
-class Board {
+public class Board {
 
     private Color[][] colors;
 
@@ -43,7 +43,7 @@ class Board {
         putToken(target, color);
     }
 
-    Color getColor(Coordinate coordinate) {
+    public Color getColor(Coordinate coordinate) {
         assert !coordinate.isNull();
 
         return colors[coordinate.getRow()][coordinate.getColumn()];
