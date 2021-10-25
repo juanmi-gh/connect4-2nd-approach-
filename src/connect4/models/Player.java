@@ -1,57 +1,57 @@
 package connect4.models;
 
-import static connect4.types.Coordinate.*;
+
 import static connect4.types.Error.*;
 
-import connect4.types.Color;
-import connect4.types.Coordinate;
 import connect4.types.Error;
+import connect4.types.PlayerType;
+import connect4.types.Token;
 
 public class Player {
 
-    private Color color;
+    private Token token;
     private Board board;
-    private int putTokens;
+    private PlayerType type;
 
-    Player(Color color, Board board) {
-        assert !color.isNull();
-        assert board != null;
-
-        this.color = color;
+    public Player(Token token, Board board, PlayerType type) {
+        this.token = token;
         this.board = board;
-        this.putTokens = 0;
+        this.type = type;
     }
 
-    boolean areAllTokensOnBoard() {
-        return putTokens == DIMENSION;
+    public PlayerType getType() {
+        return type;
     }
 
-    void putToken(Coordinate coordinate) {
-        assert putTokens < DIMENSION;
+    void put(Coordinate coordinate) {
+        board.put(coordinate, this.token);
+    };
 
-        board.putToken(coordinate, this.color);
-        putTokens++;
+    void move(Coordinate[] coordinates) {
+        board.move(coordinates[0], coordinates[1]);
+    };
+
+    Token getToken() {
+        return token;
     }
 
-    Error getPutTokenError(Coordinate coordinate) {
-
-        return board.isEmpty(coordinate) ? NULL : NOT_EMPTY;
+    public Error getPutCoordinateError(Coordinate coordinate) {
+        
+        return board.isEmpty(coordinate) ? null : NOT_OWNER;
     }
 
-    void moveToken(Coordinate origin, Coordinate target) {
-        board.moveToken(origin, target);
+    public Error getMoveOriginCoordinateError(Coordinate originCoordinate) {
+        
+        return board.isOccupied(originCoordinate, token) ? null : NOT_OWNER;
     }
 
-    Error getOriginMoveTokenError(Coordinate origin) {
-        return board.isOccupied(origin, color) ? NULL : NOT_OWNER;
+    public Error getMoveTargetCoordinateError(Coordinate originCoordinate, Coordinate targetCoordinate) {
+        
+        return originCoordinate.equals(targetCoordinate) ? SAME_COORDINATES : isEmpty(targetCoordinate);
     }
-
-    Error getTargetMoveTokenError(Coordinate origin, Coordinate target) {
-        return origin.equals(target) ? SAME_COORDINATES : getPutTokenError(target);
-    }
-
-    public Color getColor() {
-        return color;
+    
+    private Error isEmpty(Coordinate coordinate) {
+        return board.isEmpty(coordinate) ? null : NOT_EMPTY;
     }
 
 }

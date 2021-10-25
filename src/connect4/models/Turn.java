@@ -1,68 +1,45 @@
 package connect4.models;
 
-import connect4.types.Color;
-import connect4.types.Coordinate;
-import connect4.types.Error;
-
 public class Turn {
 
-    private Board board;
-    public static final int NUMBER_PLAYERS = 2;
+    public static final int NUM_PLAYERS = 2;
+
+    private int value;
+
     private Player[] players;
-    private int activePlayer;
 
-    Turn(Board board) {
-        assert board != null;
-        
-        this.board = board;
-        this.players = new Player[NUMBER_PLAYERS];
-        
-        reset();
+    public Turn(Player[] players) {
+        value = 0;
+        this.players = players;
     }
 
-    void reset() {
-        for (int i = 0; i < NUMBER_PLAYERS; i++) {
-            players[i] = new Player(Color.get(i), board);
-        }
-        activePlayer = 0;
+    public Turn(Player[] players, int value) {
+        this.value = value;
+        this.players = players;
     }
 
-    void next() {
-        if (!board.isTicTacToe(getActiveColor())) {
-            activePlayer = (activePlayer + 1) % NUMBER_PLAYERS;
-        }
+    void change() {
+        value = getOtherValue();
     }
 
-    Player getActivePlayer() {
-        return players[activePlayer];
+    Player getPlayer() {
+        return players[value];
     }
 
-    Color getActiveColor() {
-        return getActivePlayer().getColor();
+    int getValue() {
+        return value;
     }
 
-    boolean areAllTokensOnBoard() {
-        return getActivePlayer().areAllTokensOnBoard();
+    private int getOtherValue() {
+        return (value++) % NUM_PLAYERS;
     }
 
-    void putToken(Coordinate coordinate) {
-        getActivePlayer().putToken(coordinate);
+    Player getOtherPlayer() {
+        return players[getOtherValue()];
     }
 
-    Error getPutTokenError(Coordinate coordinate) {
-        return getActivePlayer().getPutTokenError(coordinate);
-    }
-
-    void moveToken(Coordinate origin, Coordinate target) {
-        getActivePlayer().moveToken(origin, target);
-    }
-
-    Error getOriginMoveTokenError(Coordinate coordinate) {
-        return getActivePlayer().getOriginMoveTokenError(coordinate);
-    }
-
-    Error getTargetMoveTokenError(Coordinate origin, Coordinate target) {
-        return getActivePlayer().getTargetMoveTokenError(origin, target);
+    Turn copy(Player[] players) {
+        return new Turn(players, value);
     }
 
 }

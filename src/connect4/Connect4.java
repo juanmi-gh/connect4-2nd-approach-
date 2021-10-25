@@ -1,39 +1,32 @@
 package connect4;
 
-import connect4.controllers.PlayController;
-import connect4.controllers.ResumeController;
-import connect4.controllers.StartController;
-import connect4.models.Game;
-import connect4.views.ViewFactory;
+import connect4.controllers.AcceptorController;
+import connect4.controllers.Logic;
+import connect4.views.View;
 
 abstract class Connect4 {
 
-    private final Game game;
-    private final ViewFactory viewFactory;
+    private Logic logic;
 
-    private final StartController startController;
-    private final PlayController playController;
-    private final ResumeController resumeController;
+    private View view;
 
     protected Connect4() {
-        game = new Game();
-        viewFactory = createViewFactory();
-
-        startController = new StartController(game, viewFactory);
-        playController = new PlayController(game, viewFactory);
-        resumeController = new ResumeController(game, viewFactory);
+        logic = this.createLogic();
+        view = new View();
     }
-
-    protected abstract ViewFactory createViewFactory();
+    
+    protected abstract Logic createLogic();
 
     protected void play() {
-
-        do {
-            startController.control();
-            
-            playController.control();
         
-        } while (resumeController.control());
+        AcceptorController acceptorController;
+        
+        do {
+            acceptorController = logic.getController();
+            if (acceptorController != null){
+                view.interact(acceptorController);
+            }
+        } while (acceptorController != null);
     }
 
 }

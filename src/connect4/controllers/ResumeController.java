@@ -1,22 +1,18 @@
 package connect4.controllers;
 
-import connect4.models.Game;
-import connect4.views.ViewFactory;
+import connect4.models.Session;
 
-public class ResumeController extends Controller {
+public abstract class ResumeController extends AcceptorController {
 
-    public ResumeController(Game game, ViewFactory viewFactory) {
-        super(game, viewFactory);
+    public ResumeController(Session session) {
+        super(session);
     }
 
-    public boolean control() {
-        
-        boolean isResumed = viewFactory.createResumeView().read();
-        if (isResumed) {
-            this.game.reset();
-        }
-        
-        return isResumed;
+    public abstract void resume(boolean newGame);
+
+    @Override
+    public void accept(ControllersVisitor controllersVisitor) {
+        controllersVisitor.visit(this);
     }
 
 }

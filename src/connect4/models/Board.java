@@ -1,102 +1,138 @@
 package connect4.models;
 
-import static connect4.types.Color.*;
-import static connect4.types.Coordinate.*;
+import static connect4.models.Turn.*;
+import static connect4.models.Coordinate.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import connect4.types.Color;
-import connect4.types.Coordinate;
+import connect4.types.Token;
 import utils.models.Direction;
 
 public class Board {
 
-    private Color[][] colors;
+    static final char EMPTY = '-';
 
-    Board() {
-        colors = new Color[DIMENSION][DIMENSION];
-        reset();
-    }
+    private Coordinate[][] coordinates;
 
-    void reset() {
-        for (int i = 0; i < DIMENSION; i++) {
+    public Board() {
+        coordinates = new Coordinate[NUM_PLAYERS][DIMENSION];
+        for (int i = 0; i < NUM_PLAYERS; i++) {
             for (int j = 0; j < DIMENSION; j++) {
-                colors[i][j] = NULL;
+                coordinates[i][j] = null;
             }
         }
     }
 
-    void putToken(Coordinate coordinate, Color color) {
-        assert !coordinate.isNull();
-
-        colors[coordinate.getRow()][coordinate.getColumn()] = color;
+    public Board(Coordinate[][] coordinates) {
+        this.coordinates = coordinates;
     }
 
-    void moveToken(Coordinate origin, Coordinate target) {
-        assert !origin.isNull() && !isEmpty(origin);
-        assert !target.isNull() && isEmpty(target);
-        assert !origin.equals(target);
-
-        Color color = getColor(origin);
-        putToken(origin, Color.NULL);
-        putToken(target, color);
-    }
-
-    public Color getColor(Coordinate coordinate) {
-        assert !coordinate.isNull();
-
-        return colors[coordinate.getRow()][coordinate.getColumn()];
-    }
-
-    boolean isOccupied(Coordinate coordinate, Color color) {
-        return getColor(coordinate) == color;
-    }
-
-    boolean isEmpty(Coordinate coordinate) {
-        return isOccupied(coordinate, Color.NULL);
-    }
-
-    boolean isTicTacToe(Color color) {
-        assert !color.isNull();
-
-        List<Direction> directions = getDirections(color);
-        if (directions.size() < DIMENSION - 1) {
-            return false;
-        }
-        for (int i = 0; i < directions.size() - 1; i++) {
-            if (directions.get(i) != directions.get(i + 1)) {
-                return false;
-            }
-        }
-        return !directions.get(0).isNull();
-    }
-
-    private List<Direction> getDirections(Color color) {
-        assert !color.isNull();
-
-        List<Direction> directions = new ArrayList<>();
-        List<Coordinate> coordinates = getCoordinates(color);
-        if (!coordinates.isEmpty()) {
-            for (int i = 0; i < coordinates.size() - 1; i++) {
-                directions.add(coordinates.get(i).getDirection(coordinates.get(i + 1)));
-            }
-        }
-        return directions;
-    }
-
-    List<Coordinate> getCoordinates(Color color) {
-        assert !color.isNull();
-
-        List<Coordinate> coordinates = new ArrayList<>();
-        for (int i = 0; i < DIMENSION; i++) {
+    public Token getToken(Coordinate coordinate) {
+        for (int i = 0; i < NUM_PLAYERS; i++) {
             for (int j = 0; j < DIMENSION; j++) {
-                if (getColor(new Coordinate(i, j)) == color) {
-                    coordinates.add(new Coordinate(i, j));
+                if (coordinates[i][j] != null 
+                        && coordinates[i][j].getRow() == coordinate.getRow()
+                        && coordinates[i][j].getColumn() == coordinate.getColumn()) {
+                    return Token.values()[i];
                 }
             }
         }
-        return coordinates;
+        return null;
+    }
+
+    void move(Coordinate originCoordinate, Coordinate coordinate) {
+        assert !isEmpty(originCoordinate);
+        assert isEmpty(coordinate);
+        
+        Token token = getToken(originCoordinate);
+        remove(originCoordinate);
+        put(coordinate, token);
+    }
+
+    void put(Coordinate coordinate, Token token) {
+        assert isEmpty(coordinate);
+        
+        int i = 0;
+        while (coordinates[token.ordinal()][i] != null) {
+            i++;
+        }
+        coordinates[token.ordinal()][i] = coordinate;
+    }
+
+    private void remove(Coordinate coordinate) {
+        for (int i = 0; i < NUM_PLAYERS; i++) {
+            for (int j = 0; j < DIMENSION; j++) {
+                if (coordinates[i][j] != null 
+                        && coordinates[i][j].getRow() == coordinate.getRow()
+                        && coordinates[i][j].getColumn() == coordinate.getColumn()) {
+                    coordinates[i][j] = null;
+                }
+            }
+        }
+    }
+
+    boolean isTicTacToe(Token token) {
+        Coordinate[] coordinates = this.coordinates[token.ordinal()];
+        return checkNumberOfCoordinates(coordinates) 
+                && checkDirectionOfFirstCoordinates(coordinates)
+                && checkDirectionOfAllCoordinates(coordinates);
+    }
+
+    private boolean checkNumberOfCoordinates(Coordinate[] coordinates) {
+        return numberOfCoordinates(coordinates) == DIMENSION;
+    }
+
+    private boolean checkDirectionOfFirstCoordinates(Coordinate[] coordinates) {
+        return coordinates[0].inDirection(coordinates[1]);
+    }
+
+    private boolean checkDirectionOfAllCoordinates(Coordinate[] coordinates) {
+        
+        Direction direction = coordinates[0].getDirection(coordinates[1]);
+        for (int i = 1; i < coordinates.length - 1; i++) {
+            if (direction != coordinates[i].getDirection(coordinates[i + 1])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int numberOfCoordinates(Coordinate[] coordinates) {
+        int count = 0;
+        for (int i = 0; i < coordinates.length; i++) {
+            if (coordinates[i] != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    boolean isCompleted() {
+        for (int i = 0; i < NUM_PLAYERS; i++) {
+            for (int j = 0; j < DIMENSION; j++) {
+                if (coordinates[i][j] == null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean isEmpty(Coordinate coordinate) {
+        return isOccupied(coordinate, null);
+    }
+
+    boolean isOccupied(Coordinate coordinate, Token token) {
+        return getToken(coordinate) == token;
+    }
+
+    Board copy() {
+
+        Coordinate[][] coordinatesCopy = new Coordinate[NUM_PLAYERS][DIMENSION];
+        for(int i = 0; i < NUM_PLAYERS; i++ ) {
+            for(int j = 0; j < DIMENSION; j++ ) {
+                coordinatesCopy[i][j] = coordinates[i][j];
+            }
+        }
+        return new Board(coordinatesCopy);
     }
 
 }

@@ -1,85 +1,105 @@
 package connect4.models;
 
-import connect4.types.Color;
-import connect4.types.Coordinate;
+import static connect4.models.Turn.*;
+import static connect4.types.Error.*;
+
 import connect4.types.Error;
+import connect4.types.PlayerType;
+import connect4.types.Token;
 
 public class Game {
 
     private Board board;
     private Turn turn;
+    private Player[] players;
 
     public Game() {
+        newGame();
+    }
+
+    public void newGame() {
         board = new Board();
-        turn = new Turn(this.board);
-    }
-
-    public void reset() {
-        board.reset();
-        turn.reset();
-    }
-
-    public void next() {
-        turn.next();
-    }
-
-    public Player getActivePlayer() {
-        return this.turn.getActivePlayer();
+        players = new Player[NUM_PLAYERS];
+        turn = new Turn(players);
     }
     
-    public Board getBoard() {
-        return this.board;
+    public void createPlayers(int numberOfUsers) {
+
+        for (int i = 0; i < numberOfUsers; i++) {
+            players[i] = new Player(Token.values()[i], board, PlayerType.USER_PLAYER);
+        }
+        
+        for (int i = numberOfUsers; i < NUM_PLAYERS; i++) {
+            players[i] = new Player(Token.values()[i], board, PlayerType.MACHINE_PLAYER);
+        }
+    }
+
+    Memento createMemento() {
+        Board board = this.board.copy();
+        return new Memento(board, createCopyOfPlayers(players, board), turn);
+    }
+
+    void set(Memento memento) {
+        board = memento.getBoard().copy();
+        players = createCopyOfPlayers(memento.getPlayers(), board);
+        turn = memento.getTurn().copy(players);
+    }
+
+    private Player[] createCopyOfPlayers(Player[] players, Board board) {
+        Player[] playersCopy = new Player[2];
+        for (int i = 0; i < NUM_PLAYERS; i++) {
+            playersCopy[i] = new Player(players[i].getToken(), board, players[i].getType());
+        }
+        return playersCopy;
+    }
+
+    public boolean isBoardComplete() {
+        return board.isCompleted();
+    }
+
+    public void putTokenPlayerFromTurn(Coordinate coordinate) {
+        turn.getPlayer().put(coordinate);
+    }
+
+    public void moveTokenPlayerFromTurn(Coordinate[] coordinates) {
+        turn.getPlayer().move(coordinates);
+    }
+
+    public PlayerType getTypeOfTokenPlayerFromTurn() {
+        return turn.getPlayer().getType();
+    }
+
+    public Error getPutCoordinateError(Coordinate coordinate) {
+        return board.isEmpty(coordinate) ? null : NOT_OWNER;
+    }
+
+    public Error getMoveOriginCoordinateError(Coordinate originCoordinate) {
+        return board.isOccupied(originCoordinate, turn.getPlayer().getToken()) ? null : NOT_OWNER;
+    }
+
+    public Error getMoveTargetCoordinateError(Coordinate originCoordinate, Coordinate targetCoordinate) {
+        return originCoordinate.equals(targetCoordinate) ? SAME_COORDINATES : isEmpty(targetCoordinate);
+    }
+    
+    private Error isEmpty(Coordinate coordinate) {
+        return board.isEmpty(coordinate) ? null : NOT_EMPTY;
+    }
+
+    public Token getToken(Coordinate coordinate) {
+        return board.getToken(coordinate);
+    }
+
+    public void changeTurn() {
+        turn.change();
     }
 
     public boolean isTicTacToe() {
-        return board.isTicTacToe(turn.getActiveColor());
+        return board.isTicTacToe(turn.getOtherPlayer().getToken());
     }
 
-    public Color getColor(Coordinate coordinate) {
-        return board.getColor(coordinate);
+    public int getValueFromTurn() {
+        return turn.getValue();
     }
 
-    public boolean areAllTokensOnBoard() {
-        return turn.areAllTokensOnBoard();
-    }
-
-    public void putToken(Coordinate coordinate) {
-        turn.putToken(coordinate);
-    }
-
-    public Error getPutTokenError(Coordinate coordinate) {
-        return turn.getPutTokenError(coordinate);
-    }
-
-    public void moveToken(Coordinate origin, Coordinate target) {
-        turn.moveToken(origin, target);
-    }
-
-    public Error getOriginMoveTokenError(Coordinate coordinate) {
-        return turn.getOriginMoveTokenError(coordinate);
-    }
-
-    public Error getTargetMoveTokenError(Coordinate origin, Coordinate target) {
-        return turn.getTargetMoveTokenError(origin, target);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Game other = (Game) obj;
-        if (board == null) {
-            if (other.board != null)
-                return false;
-        } else if (!board.equals(other.board))
-            return false;
-        if (turn == null) {
-            return other.turn == null;
-        } else return turn.equals(other.turn);
-    }
 
 }

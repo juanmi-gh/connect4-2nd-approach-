@@ -1,15 +1,17 @@
 package connect4.controllers;
 
-import connect4.models.Game;
-import connect4.views.ViewFactory;
+import connect4.models.Session;
+import connect4.types.StateValue;
 
 public abstract class Controller {
 
-    protected Game game;
-    protected ViewFactory viewFactory;
+    protected Session session;
 
-    Controller(Game game, ViewFactory viewFactory) {
-        this.game = game;
-        this.viewFactory = viewFactory;
+    Controller(Session session) {
+        this.session = session;
+    }
+
+    public StateValue getValueState() {
+        return session.getValueState();
     }
 }

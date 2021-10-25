@@ -1,42 +1,58 @@
 package connect4.controllers;
 
-import connect4.models.Game;
-import connect4.types.Coordinate;
-import connect4.views.Message;
-import connect4.views.ViewFactory;
+import connect4.models.Coordinate;
+import connect4.models.Session;
+import connect4.types.PlayerType;
+import connect4.types.Error;
 
-public class PlayController extends Controller {
-
-    public PlayController(Game game, ViewFactory viewFactory) {
-        super(game, viewFactory);
+public abstract class PlayController extends AcceptorController {
+    
+    public PlayController(Session session) {
+        super(session);
     }
 
-    public void control() {
+    public abstract void undo();
 
-        do {
-            getActionController().run();
-            game.next();
-            viewFactory.createBoardView(game.getBoard()).write();
-        
-        } while (!game.isTicTacToe());
+    public abstract void redo();
 
-        viewFactory.createPlayerView(game.getActivePlayer()).writeWinner();
+    public abstract boolean undoable();
+
+    public abstract boolean redoable();
+
+    public abstract PlayerType getTypeOfTokenPlayerFromTurn();
+
+    public abstract Error getPutCoordinateError(Coordinate coordinate);
+
+    public abstract Error getMoveOriginCoordinateError(Coordinate coordinate);
+
+    public abstract Error getMoveTargetCoordinateError(Coordinate originCoordinate, Coordinate targetCoordinate);
+
+    public abstract boolean isCoordinateValid(Coordinate coordinate);
+
+    public abstract Coordinate generateRandomCoordinate();
+
+    public abstract boolean isBoardComplete();
+
+    public abstract void putTokenPlayerFromTurn(Coordinate coordinate);
+
+    public abstract void moveTokenPlayerFromTurn(Coordinate[] coordinates);
+
+    public abstract void changeTurn();
+
+    public abstract char getTokenChar(Coordinate coordinate);
+
+    public abstract boolean isEmptyToken(Coordinate coordinate);
+
+    public abstract int getCoordinateDimension();
+
+    public abstract int getValueFromTurn();
+
+    public abstract boolean isTicTacToe();
+    
+    public abstract void continueState();
+
+    @Override
+    public void accept(ControllersVisitor controllersVisitor) {
+        controllersVisitor.visit(this);
     }
-        
-    protected Coordinate getCoordinate(Message message) {
-        assert message != null;
-
-        return (Coordinate) viewFactory.createCoordinateView().read(message.toString());
-    }
-
-    private ActionController getActionController() {
-        
-        if (game.areAllTokensOnBoard()) {
-            return new MoveController(game, viewFactory);
-        
-        } else {
-            return new PutController(game, viewFactory);
-        }
-    }
-
 }

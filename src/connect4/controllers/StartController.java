@@ -1,17 +1,19 @@
 package connect4.controllers;
 
-import connect4.models.Game;
-import connect4.views.ViewFactory;
+import connect4.models.Session;
 
-public class StartController extends Controller {
-
-    public StartController(Game game, ViewFactory viewFactory) {
-        super(game, viewFactory);
+public abstract class StartController extends AcceptorController {
+    
+    public StartController(Session session) {
+        super(session);
     }
 
-    public void control() {
-        viewFactory.createStartView().write();
-        viewFactory.createBoardView(game.getBoard()).write();
-    }
+    public abstract void start();
 
+    public abstract void createPlayers(int numberOfUsers);
+
+    @Override
+    public void accept(ControllersVisitor controllersVisitor) {
+        controllersVisitor.visit(this);
+    }
 }

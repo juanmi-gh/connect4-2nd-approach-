@@ -1,38 +1,32 @@
 package utils.views;
 
-public class YesNoDialog {
+public class YesNoDialog extends WithConsoleView {
 
     private static final char AFFIRMATIVE = 'y';
     private static final char NEGATIVE = 'n';
     private static final String SUFFIX = "? (AFFIRMATIVE/NEGATIVE): ";
     private static final String INVALID_VALUE = "The value must be 'AFFIRMATIVE' or 'NEGATIVE'";
-    private String answer;
 
-    public void read(String message) {
-        assert message != null;
+	public boolean read(String title) {
+		assert title != null;
+		
+		char answer;
+		boolean ok;
+		do {
+			answer = console.readChar(title + SUFFIX);
+			ok = isAfirmative(answer) || isNegative(answer);
+			if (!ok) {
+				console.writeln(INVALID_VALUE);
+			}
+		} while (!ok);
+		return YesNoDialog.isAfirmative(answer);
+	}
 
-        Console console = Console.getInstance();
-        boolean ok;
-        do {
-            console.write(message);
-            answer = console.readString(SUFFIX);
-            
-            ok = this.isAffirmative() || this.isNegative();
-            if (!ok) {
-                console.writeln(INVALID_VALUE);
-            }
-        } while (!ok);
-    }
-    
-    public boolean isAffirmative() {
-        return getAnswer() == AFFIRMATIVE;
-    }
-    
-    private char getAnswer(){
-        return Character.toLowerCase(answer.charAt(0));
-    }
+	private static boolean isAfirmative(char answer) {
+		return Character.toLowerCase(answer) == AFFIRMATIVE;
+	}
 
-    public boolean isNegative() {
-        return this.getAnswer() == NEGATIVE;
+	private static boolean isNegative(char answer) {
+		return Character.toLowerCase(answer) == NEGATIVE;
     }
 }
